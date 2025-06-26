@@ -16,3 +16,6 @@ coverage/
 # Editor
 .vscode/
 .idea/
+
+uploads/
+
