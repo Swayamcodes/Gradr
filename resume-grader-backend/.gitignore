@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Env vars
+.env
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+
+# System
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
