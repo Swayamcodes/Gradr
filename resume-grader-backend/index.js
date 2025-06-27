@@ -61,3 +61,19 @@ app.get("/env-test", (req, res) => {
   res.send(`KEY: ${keyExists}`);
 });
 
+app.post("/api/claude", async (req, res) => {
+  const { messages, resumeText, jobDescText } = req.body;
+
+  if (!messages || !resumeText || !jobDescText) {
+    return res.status(400).json({ error: "Missing fields." });
+  }
+
+  try {
+    const reply = await callClaude(messages, resumeText, jobDescText);
+    res.json({ reply });
+  } catch (err) {
+    console.error("Claude route error:", err.message);
+    res.status(500).json({ error: "Failed to fetch AI response." });
+  }
+});
+
