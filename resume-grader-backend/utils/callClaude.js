@@ -1,5 +1,6 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 export async function callClaude(messages, resumeText, jobDescText) {
@@ -68,16 +69,22 @@ If you cannot produce this JSON, reply with the string: ERROR.`
       }
     );
 
-    let raw = response.data.choices[0].message.content.trim();
+    let raw = response.data?.choices?.[0]?.message?.content?.trim();
+    if (!raw) throw new Error("Empty response from Claude");
 
-   
     raw = raw.replace(/^```json|^```|```$/g, '').trim();
 
     if (raw === "ERROR") throw new Error("Claude returned 'ERROR'");
 
-    const parsed = JSON.parse(raw);
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (err) {
+      console.error("❌ JSON parsing failed:", err.message);
+      throw new Error("Claude returned malformed JSON.");
+    }
 
-    
+    // Fallback if Claude didn't return arrays for keywordMatch
     if (
       !parsed.keywordMatch ||
       !Array.isArray(parsed.keywordMatch.matched) ||
