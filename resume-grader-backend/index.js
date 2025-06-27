@@ -4,7 +4,9 @@ import multer from 'multer';
 import pdfParse from 'pdf-parse';
 import fs from 'fs';
 import dotenv from 'dotenv';
-import { callClaude } from './utils/analyzeResume.js';
+import { callClaude as analyzeClaude } from './utils/analyzeResume.js';
+import { callClaude as chatClaude } from './utils/callClaude.js';
+
 
 dotenv.config();
 
@@ -36,7 +38,7 @@ app.post(
       const jobText =
         jobDescText || (await pdfParse(fs.readFileSync(jobDescFile.path))).text;
 
-      const result = await callClaude(resumeText, jobText);
+      const result = await analyzeClaude(resumeText, jobText);
 
      
       res.json({
@@ -69,7 +71,7 @@ app.post("/api/claude", async (req, res) => {
   }
 
   try {
-    const reply = await callClaude(messages, resumeText, jobDescText);
+    const reply = await chatClaude(messages, resumeText, jobDescText);
     res.json({ reply });
   } catch (err) {
     console.error("Claude route error:", err.message);
