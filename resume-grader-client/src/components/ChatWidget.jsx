@@ -24,9 +24,7 @@ const ChatWidget = ({ resumeText, jobDescText }) => {
   setLoading(true);
 
   try {
-    const response = await axios.post(
-      "https://gradr-production.up.railway.app/api/claude", // 🔁 your Railway backend route
-      {
+   const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/claude`, {
         messages: newMessages,
         resumeText,
         jobDescText,
