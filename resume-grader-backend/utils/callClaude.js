@@ -1,6 +1,5 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 export async function callClaude(messages, resumeText, jobDescText) {
@@ -12,50 +11,11 @@ export async function callClaude(messages, resumeText, jobDescText) {
         messages: [
           {
             role: "system",
-            content: `You are an expert resume optimization specialist and career coach with a deep understanding of ATS systems, recruitment, and job-market trends.
-
-You are assisting a user by analyzing how well their resume matches a target job description.
-
-📄 Resume Content:
-"""
-${resumeText}
-"""
-
-📝 Job Description:
-"""
-${jobDescText}
-"""
-
-🎯 Your task:
-- Score the resume from 0–100 based on job fit
-- Identify keyword matches and gaps (skills, tools, tech, terms)
-- Comment on how relevant the candidate’s experience is
-- Provide ATS-friendly formatting & language tips
-- Suggest high-impact improvements (title, formatting, grammar, etc.)
-
-⚠️ Return ONLY valid JSON (no markdown, no text, no explanation). Format like this:
-
-{
-  "matchScore": number (0–100),
-  "keywordMatch": {
-    "matched": [string],
-    "missing": [string]
-  },
-  "experienceRelevance": string (brief summary),
-  "atsSuggestions": [
-    { "tip": string, "status": "pass" | "fail" }
-  ],
-  "resumeTips": [
-    {
-      "title": string,
-      "description": string,
-      "impact": "high" | "medium" | "low",
-      "category": "content" | "formatting" | "grammar" | "style" | "keywords"
-    }
-  ]
-}
-
-If you cannot produce this JSON, reply with the string: ERROR.`
+            content: `You're an AI resume assistant helping users improve their resume, job fit, and career path based on their resume and a job description. Be helpful, practical, honest, and easy to understand.`,
+          },
+          {
+            role: "user",
+            content: `Resume:\n${resumeText}\n\nJob Description:\n${jobDescText}`,
           },
           ...messages
         ],
@@ -69,34 +29,14 @@ If you cannot produce this JSON, reply with the string: ERROR.`
       }
     );
 
-    let raw = response.data?.choices?.[0]?.message?.content?.trim();
-    if (!raw) throw new Error("Empty response from Claude");
-
-    raw = raw.replace(/^```json|^```|```$/g, '').trim();
-
-    if (raw === "ERROR") throw new Error("Claude returned 'ERROR'");
-
-    let parsed;
-    try {
-      parsed = JSON.parse(raw);
-    } catch (err) {
-      console.error("❌ JSON parsing failed:", err.message);
-      throw new Error("Claude returned malformed JSON.");
+    const rawMessage = response.data?.choices?.[0]?.message;
+    if (!rawMessage || !rawMessage.content) {
+      throw new Error("Claude returned an empty message");
     }
 
-    // Fallback if Claude didn't return arrays for keywordMatch
-    if (
-      !parsed.keywordMatch ||
-      !Array.isArray(parsed.keywordMatch.matched) ||
-      !Array.isArray(parsed.keywordMatch.missing)
-    ) {
-      parsed.keywordMatch = { matched: [], missing: [] };
-    }
-
-    return parsed;
-
+    return rawMessage;
   } catch (error) {
-    console.error("💥 Claude API error:", error.response?.data || error.message);
-    throw new Error('Invalid Claude response format');
+    console.error("❌ Claude Chat API error:", error.response?.data || error.message);
+    throw new Error("Failed to get Claude chat response");
   }
 }
