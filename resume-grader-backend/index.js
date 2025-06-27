@@ -56,4 +56,8 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+app.get("/env-test", (req, res) => {
+  const keyExists = process.env.OPENROUTER_API_KEY ? "✔️ EXISTS" : "❌ MISSING";
+  res.send(`KEY: ${keyExists}`);
+});
 
