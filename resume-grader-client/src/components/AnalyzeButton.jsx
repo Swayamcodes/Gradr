@@ -38,7 +38,7 @@ const AnalyzeButton = ({ resumeFile, jobDescFile, setResult }) => {
         formData.append("jobDescText", jobDescFile.value);
       }
 
-      const response = await axios.post("http://localhost:5000/api/analyze", formData, {
+    const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/analyze`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
