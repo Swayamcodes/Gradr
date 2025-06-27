@@ -1,27 +1,24 @@
 import axios from 'axios';
 
 export const callClaude = async (resumeText, jobDescText) => {
-  const prompt = `You are an expert ATS (Applicant Tracking System) and resume optimization specialist with 10+ years of experience...
-ANALYSIS REQUIREMENTS:
-- Evaluate technical skills, experience level, education, and cultural fit
-- Consider both hard skills (technical abilities) and soft skills (leadership, communication)
-- Assess years of experience, project complexity, and industry relevance
-- Account for ATS parsing challenges and keyword optimization
-- Provide actionable, specific feedback rather than generic advice
+  const prompt = `You are an ATS and resume optimization expert with 10+ years of experience.
 
-SCORING METHODOLOGY:
-- 90-100: Exceptional fit, meets all requirements plus additional qualifications
-- 80-89: Strong fit, meets most key requirements with minor gaps
-- 70-79: Good fit, meets core requirements but has some skill gaps
-- 60-69: Moderate fit, meets basic requirements but significant gaps exist
-- Below 60: Poor fit, major requirements missing
+🧠 Analyze the resume against the job description to evaluate:
+- Technical skills, experience level, education, and cultural fit
+- Hard & soft skills, project complexity, and industry relevance
+- ATS-readiness and keyword optimization
 
-KEYWORD ANALYSIS INSTRUCTIONS:
-- Extract exact technical terms, tools, programming languages, frameworks, certifications
-- Include industry-specific terminology and methodologies
-- Consider variations and synonyms (e.g., "JavaScript" vs "JS", "AI" vs "Artificial Intelligence")
-- Prioritize keywords that appear multiple times in job description
-- Focus on skills mentioned in "required" vs "preferred" sections
+📊 Scoring Criteria:
+- 90–100: Excellent fit
+- 80–89: Strong fit
+- 70–79: Good fit
+- 60–69: Moderate fit
+- Below 60: Poor fit
+
+🔍 Keyword Matching:
+- Extract technical terms, tools, languages, frameworks, certifications
+- Include industry terms and synonyms (e.g., "AI" vs "Artificial Intelligence")
+- Prioritize recurring and “required” section keywords
 
 
 Return ONLY valid JSON with this exact structure - no explanations, markdown, or additional text:
