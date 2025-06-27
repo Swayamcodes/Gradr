@@ -39,7 +39,12 @@ Target Job Description:
 ${jobDescText}
 """
 
-Use this context to provide personalized guidance that helps bridge the gap between the candidate's current profile and their target role.`
+...
+Use this context to provide personalized guidance that helps bridge the gap between the candidate's current profile and their target role.
+
+Return your response as valid JSON only. Do not add explanations, markdown, or formatting.
+If you cannot produce valid JSON, respond with the string "ERROR".
+
           },
           ...messages
         ],
