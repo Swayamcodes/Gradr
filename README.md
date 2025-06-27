@@ -115,7 +115,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License 
 
 ---
 
@@ -124,7 +124,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **[@Swayamcodes](https://github.com/Swayamcodes)**
 
 - GitHub: [@Swayamcodes](https://github.com/Swayamcodes)
-- LinkedIn: [Connect with me](https://www.linkedin.com/in/swayamcodes) *(optional - add your LinkedIn)*
+
 
 ---
 
