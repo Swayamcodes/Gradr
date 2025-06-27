@@ -15,50 +15,37 @@ const ChatWidget = ({ resumeText, jobDescText }) => {
   }, [messages, loading]);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+  if (!input.trim()) return;
 
-    const userMessage = { role: "user", content: input };
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
-    setInput("");
-    setLoading(true);
+  const userMessage = { role: "user", content: input };
+  const newMessages = [...messages, userMessage];
+  setMessages(newMessages);
+  setInput("");
+  setLoading(true);
 
-    try {
-      const response = await axios.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          model: "anthropic/claude-3-haiku",
-          messages: [
-            {
-              role: "system",
-              content: `You are a professional AI assistant helping the user with resume improvement and job-fit guidance based on their resume and job description.\n\nResume:\n${resumeText}\n\nJob Description:\n${jobDescText}`,
-            },
-            ...newMessages,
-          ],
-          temperature: 0.7,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "http://localhost:5173",
-            "X-Title": "resume-analyzer-app",
-          },
-        }
-      );
+  try {
+    const response = await axios.post(
+      "https://gradr-production.up.railway.app/api/claude", // 🔁 your Railway backend route
+      {
+        messages: newMessages,
+        resumeText,
+        jobDescText,
+      }
+    );
 
-      const aiResponse = response.data.choices[0].message;
-      setMessages([...newMessages, aiResponse]);
-    } catch (err) {
-      console.error("❌ Chat Error:", err.message);
-      setMessages([
-        ...newMessages,
-        { role: "assistant", content: "Something went wrong." },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const aiResponse = response.data.reply;
+    setMessages([...newMessages, aiResponse]);
+  } catch (err) {
+    console.error("❌ Chat Error:", err.message);
+    setMessages([
+      ...newMessages,
+      { role: "assistant", content: "Something went wrong." },
+    ]);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleCopy = (text, index) => {
     navigator.clipboard.writeText(text);
