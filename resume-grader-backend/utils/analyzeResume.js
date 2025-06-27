@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 export const callClaude = async (resumeText, jobDescText) => {
-  const prompt = `You are an expert ATS (Applicant Tracking System) and resume optimization specialist with 10+ years of experience in recruitment and talent acquisition. Your task is to perform a comprehensive, detailed analysis comparing a candidate's resume against a specific job posting.
-
+  const prompt = `You are an expert ATS (Applicant Tracking System) and resume optimization specialist with 10+ years of experience...
 ANALYSIS REQUIREMENTS:
 - Evaluate technical skills, experience level, education, and cultural fit
 - Consider both hard skills (technical abilities) and soft skills (leadership, communication)
@@ -69,32 +68,38 @@ ${jobDescText}
   };
 
   try {
-    const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', body, {
-      headers,
-    });
+    const response = await axios.post(
+      'https://openrouter.ai/api/v1/chat/completions',
+      body,
+      { headers }
+    );
 
-    let data = response.data.choices[0].message.content;
+    let content = response.data.choices[0].message.content;
 
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("Claude did not return valid JSON.");
 
-    if (typeof data === 'string') {
-      data = JSON.parse(data);
+    let data;
+    try {
+      data = JSON.parse(jsonMatch[0]);
+    } catch (err) {
+      console.error("❌ JSON parsing failed:", err.message);
+      throw new Error("Claude returned malformed JSON.");
     }
 
-    // Failsafe: check for malformed keywordMatch
+    
     if (
       !data.keywordMatch ||
       !Array.isArray(data.keywordMatch.matched) ||
       !Array.isArray(data.keywordMatch.missing)
     ) {
-      console.warn("⚠️ Claude returned malformed keywordMatch. Using empty fallback.");
+      console.warn("⚠️ Claude returned malformed keywordMatch. Using fallback.");
       data.keywordMatch = { matched: [], missing: [] };
     }
 
     return data;
-
   } catch (err) {
     console.error("💥 Error in callClaude:", err);
     throw new Error('Invalid Claude response format');
   }
 };
-
