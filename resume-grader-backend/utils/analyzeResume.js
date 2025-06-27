@@ -23,6 +23,7 @@ KEYWORD ANALYSIS INSTRUCTIONS:
 - Prioritize keywords that appear multiple times in job description
 - Focus on skills mentioned in "required" vs "preferred" sections
 
+
 Return ONLY valid JSON with this exact structure - no explanations, markdown, or additional text:
 
 {
@@ -31,7 +32,7 @@ Return ONLY valid JSON with this exact structure - no explanations, markdown, or
     "matched": [string],
     "missing": [string]
   },
-  "experienceRelevance": string (2-3 sentence summary),
+  "experienceRelevance": string,
   "atsSuggestions": [
     { "tip": string, "status": "pass" | "fail" }
   ],
@@ -45,7 +46,7 @@ Return ONLY valid JSON with this exact structure - no explanations, markdown, or
   ]
 }
 
-Resume Content:
+Resume:
 """
 ${resumeText}
 """
@@ -58,7 +59,7 @@ ${jobDescText}
   const headers = {
     'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
     'Content-Type': 'application/json',
-    'HTTP-Referer': 'http://localhost:5173',
+    'HTTP-Referer': 'https://gradrapp.netlify.app',
     'X-Title': 'AI Resume Grader',
   };
 
@@ -68,38 +69,33 @@ ${jobDescText}
   };
 
   try {
-    const response = await axios.post(
-      'https://openrouter.ai/api/v1/chat/completions',
-      body,
-      { headers }
-    );
+    const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', body, { headers });
 
-    let content = response.data.choices[0].message.content;
+    let raw = response.data.choices?.[0]?.message?.content?.trim() || "";
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Claude did not return valid JSON.");
+    console.log("📥 Claude Raw Response:", raw.slice(0, 500));
 
-    let data;
-    try {
-      data = JSON.parse(jsonMatch[0]);
-    } catch (err) {
-      console.error("❌ JSON parsing failed:", err.message);
-      throw new Error("Claude returned malformed JSON.");
-    }
+    
+    raw = raw.replace(/^```json|^```|```$/g, "").trim();
+
+   
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("Claude did not return valid JSON");
+
+    const parsed = JSON.parse(jsonMatch[0]);
 
     
     if (
-      !data.keywordMatch ||
-      !Array.isArray(data.keywordMatch.matched) ||
-      !Array.isArray(data.keywordMatch.missing)
+      !parsed.keywordMatch ||
+      !Array.isArray(parsed.keywordMatch.matched) ||
+      !Array.isArray(parsed.keywordMatch.missing)
     ) {
-      console.warn("⚠️ Claude returned malformed keywordMatch. Using fallback.");
-      data.keywordMatch = { matched: [], missing: [] };
+      parsed.keywordMatch = { matched: [], missing: [] };
     }
 
-    return data;
-  } catch (err) {
-    console.error("💥 Error in callClaude:", err);
-    throw new Error('Invalid Claude response format');
+    return parsed;
+  } catch (error) {
+    console.error("💥 Error in callClaude:", error.message || error);
+    throw new Error("Invalid Claude response format");
   }
 };
