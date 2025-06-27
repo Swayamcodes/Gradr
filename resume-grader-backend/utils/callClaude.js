@@ -1,4 +1,6 @@
 import axios from 'axios';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export async function callClaude(messages, resumeText, jobDescText) {
   try {
@@ -9,42 +11,50 @@ export async function callClaude(messages, resumeText, jobDescText) {
         messages: [
           {
             role: "system",
-            content: `You are an expert career advisor and resume optimization specialist with extensive experience in ATS systems, recruitment, and talent acquisition across multiple industries.
+            content: `You are an expert resume optimization specialist and career coach with a deep understanding of ATS systems, recruitment, and job-market trends.
 
-CONTEXT ANALYSIS:
-You have access to the candidate's complete resume and the target job description. Use this information to provide personalized, actionable advice that directly addresses the gap between where the candidate currently stands and what the role requires.
+You are assisting a user by analyzing how well their resume matches a target job description.
 
-EXPERTISE AREAS:
-- Resume optimization and ATS compatibility
-- Industry-specific skill requirements and trends  
-- Interview preparation and career strategy
-- Keyword optimization and formatting best practices
-- Skills gap analysis and professional development recommendations
-
-COMMUNICATION STYLE:
-- Provide specific, actionable advice rather than generic suggestions
-- Reference exact details from their resume and job description when relevant
-- Explain the "why" behind your recommendations
-- Be encouraging but honest about areas needing improvement
-- Prioritize high-impact changes that improve job-match probability
-
-AVAILABLE DATA:
-Resume Content:
+📄 Resume Content:
 """
 ${resumeText}
 """
 
-Target Job Description:  
+📝 Job Description:
 """
 ${jobDescText}
 """
 
-...
-Use this context to provide personalized guidance that helps bridge the gap between the candidate's current profile and their target role.
+🎯 Your task:
+- Score the resume from 0–100 based on job fit
+- Identify keyword matches and gaps (skills, tools, tech, terms)
+- Comment on how relevant the candidate’s experience is
+- Provide ATS-friendly formatting & language tips
+- Suggest high-impact improvements (title, formatting, grammar, etc.)
 
-Return your response as valid JSON only. Do not add explanations, markdown, or formatting.
-If you cannot produce valid JSON, respond with the string "ERROR".
+⚠️ Return ONLY valid JSON (no markdown, no text, no explanation). Format like this:
 
+{
+  "matchScore": number (0–100),
+  "keywordMatch": {
+    "matched": [string],
+    "missing": [string]
+  },
+  "experienceRelevance": string (brief summary),
+  "atsSuggestions": [
+    { "tip": string, "status": "pass" | "fail" }
+  ],
+  "resumeTips": [
+    {
+      "title": string,
+      "description": string,
+      "impact": "high" | "medium" | "low",
+      "category": "content" | "formatting" | "grammar" | "style" | "keywords"
+    }
+  ]
+}
+
+If you cannot produce this JSON, reply with the string: ERROR.`
           },
           ...messages
         ],
@@ -58,9 +68,28 @@ If you cannot produce valid JSON, respond with the string "ERROR".
       }
     );
 
-    return response.data.choices[0].message;
+    let raw = response.data.choices[0].message.content.trim();
+
+   
+    raw = raw.replace(/^```json|^```|```$/g, '').trim();
+
+    if (raw === "ERROR") throw new Error("Claude returned 'ERROR'");
+
+    const parsed = JSON.parse(raw);
+
+    
+    if (
+      !parsed.keywordMatch ||
+      !Array.isArray(parsed.keywordMatch.matched) ||
+      !Array.isArray(parsed.keywordMatch.missing)
+    ) {
+      parsed.keywordMatch = { matched: [], missing: [] };
+    }
+
+    return parsed;
+
   } catch (error) {
-    console.error("Claude API error:", error.response?.data || error.message);
-    throw error;
+    console.error("💥 Claude API error:", error.response?.data || error.message);
+    throw new Error('Invalid Claude response format');
   }
 }
