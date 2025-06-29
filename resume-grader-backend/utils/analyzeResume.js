@@ -60,7 +60,7 @@ ${jobDescText}
   };
 
   const body = {
-    model: 'openai/gpt-3.5-turbo',
+    model: 'mistralai/mistral-7b-instruct',
     messages: [{ role: 'user', content: prompt }],
   };
 
