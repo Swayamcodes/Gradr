@@ -7,8 +7,8 @@ export async function callClaude(messages, resumeText, jobDescText) {
     const response = await axios.post(
       'https://openrouter.ai/api/v1/chat/completions',
       {
-        model: "anthropic/claude-3-haiku",
-        max_tokens: 500,
+        model: 'openai/gpt-3.5-turbo',
+        max_tokens: 1000,
         messages: [
           {
             role: "system",
