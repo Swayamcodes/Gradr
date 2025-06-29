@@ -20,7 +20,6 @@ export const callClaude = async (resumeText, jobDescText) => {
 - Include industry terms and synonyms (e.g., "AI" vs "Artificial Intelligence")
 - Prioritize recurring and “required” section keywords
 
-
 Return ONLY valid JSON with this exact structure - no explanations, markdown, or additional text:
 
 {
@@ -66,22 +65,27 @@ ${jobDescText}
   };
 
   try {
-    const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', body, { headers });
+    
+    console.log("📤 Sending to Claude:", resumeText.length, jobDescText.length);
+
+    const response = await axios.post(
+      'https://openrouter.ai/api/v1/chat/completions',
+      body,
+      { headers }
+    );
 
     let raw = response.data.choices?.[0]?.message?.content?.trim() || "";
 
     console.log("📥 Claude Raw Response:", raw.slice(0, 500));
 
-    
     raw = raw.replace(/^```json|^```|```$/g, "").trim();
 
-   
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Claude did not return valid JSON");
 
     const parsed = JSON.parse(jsonMatch[0]);
 
-    
+   
     if (
       !parsed.keywordMatch ||
       !Array.isArray(parsed.keywordMatch.matched) ||
@@ -92,7 +96,14 @@ ${jobDescText}
 
     return parsed;
   } catch (error) {
-    console.error("💥 Error in callClaude:", error.message || error);
+    const status = error.response?.status;
+    const data = error.response?.data;
+    console.error("💥 Error in callClaude (analyzeResume.js):", status, data || error.message);
+
+    if (status === 402) {
+      throw new Error("OpenRouter billing error – not enough tokens or account unpaid.");
+    }
+
     throw new Error("Invalid Claude response format");
   }
 };
