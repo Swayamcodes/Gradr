@@ -60,7 +60,7 @@ ${jobDescText}
   };
 
   const body = {
-    model: 'mistralai/mistral-7b-instruct',
+    model: 'meta-llama/llama-3.1-70b-instruct',
     messages: [{ role: 'user', content: prompt }],
   };
 
